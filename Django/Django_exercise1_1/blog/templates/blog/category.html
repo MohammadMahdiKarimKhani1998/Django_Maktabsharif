@@ -1,0 +1,28 @@
+{% extends "base/base.html" %}
+{% block title %}Categories{% endblock %}
+{% block body %}
+    <div class="container p-2">
+        <div class="row">
+            <div class="col-12">
+                <ul class="nav nav-tabs">
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'home' %}">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'posts' %}">Posts</a>
+              </li>
+            </ul>
+            </div>
+        </div>
+        <div class="border border-dark p-2 bg-dark rounded">
+            {% for post in posts %}
+                <div class="jumbotron jumbotron-fluid">
+                  <div class="container">
+                      <h1 class="display-4 text-right" dir="rtl"><a href="{% url 'post' post.slug %}">{{ post.title }}</a></h1>
+                    <p class="lead text-right text-truncate" dir="rtl"><b>{{ post.content }}</b></p>
+                  </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

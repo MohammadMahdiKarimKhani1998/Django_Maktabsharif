@@ -1,0 +1,29 @@
+{% extends "base/base.html" %}
+{% block title %}Posts{% endblock %}
+{% block body %}
+    <div class="container p-2">
+        <div class="row">
+            <div class="col-12">
+                <ul class="nav nav-tabs">
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'home' %}">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" href="#">Posts</a>
+              </li>
+            </ul>
+            </div>
+        </div>
+        {% for post in posts %}
+            <div class="media" style="margin: 10px 0;">
+              <img src="../../../{{ post.image }}" class="img-thumbnail align-self-center" alt="Ash.jpg" style="max-width: 20%; height: auto">
+              <div class="media-body border border-info">
+                <h4 class="mt-0 text-right" dir="rtl"><a href="{% url 'post' post.slug %}">{{ post.title }}</a></h4>
+                <div class="text-right" dir="rtl">
+                    <div class="overflow-auto" style="height: 120px">{{ post.content }}</div>
+                </div>
+              </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

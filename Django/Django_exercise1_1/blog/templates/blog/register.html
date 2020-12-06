@@ -1,0 +1,21 @@
+{% extends 'base/base.html' %}
+{% block head %}
+    <link rel="stylesheet" href="style.css">
+{% endblock %}
+{% block title %}
+    Register
+{% endblock %}
+{% block body %}
+    <div class="bo"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <form method="post" action="{% url 'register' %}">
+                    {% csrf_token %}
+                    {{ form.as_ul }}
+                    <button type="submit">submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

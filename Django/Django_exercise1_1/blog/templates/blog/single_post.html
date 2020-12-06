@@ -1,0 +1,21 @@
+{% extends 'base/base.html' %}
+{% block title %}posts/{{ post.slug }}{% endblock %}
+{% block body %}
+    <div class="container p-2">
+        <div class="row">
+            <div class="col-12">
+                <ul class="nav nav-tabs">
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'home' %}">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'posts' %}">Posts</a>
+              </li>
+            </ul>
+            </div>
+        </div>
+        <h3 dir="rtl" class="text-right mt-2 mb-2">{{ post.title }}:</h3>
+        <img src="../../../{{ post.image }}" class="col-8 img-thumbnail rounded mx-auto d-block mt-3" alt="...">
+        <p dir="rtl" class="text-right mt-4">{{ post.content }}</p>
+    </div>
+{% endblock %}
