@@ -17,5 +17,9 @@
         <h3 dir="rtl" class="text-right mt-2 mb-2">{{ post.title }}:</h3>
         <img src="../../../{{ post.image }}" class="col-8 img-thumbnail rounded mx-auto d-block mt-3" alt="...">
         <p dir="rtl" class="text-right mt-4">{{ post.content }}</p>
+        <div class="form-group">
+            <label>content :</label>
+            {{ comment_form.content }}
+        </div>
     </div>
 {% endblock %}

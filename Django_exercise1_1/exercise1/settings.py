@@ -1,3 +1,4 @@
+
 """
 Django settings for exercise1 project.
 
@@ -26,8 +27,7 @@ SECRET_KEY = 'a@%h!9^+qo(4m4kd-$9+5jngev5kk^6@5h!4d72om5a9e=s1d4'
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
-
+AUTH_USER_MODEL = 'account.User'
 # Application definition
 
 INSTALLED_APPS = [
@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'blog.apps.BlogConfig',
+    'account.apps.AccountConfig',
 ]
 
 MIDDLEWARE = [
