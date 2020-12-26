@@ -17,9 +17,32 @@
         <h3 dir="rtl" class="text-right mt-2 mb-2">{{ post.title }}:</h3>
         <img src="../../../{{ post.image }}" class="col-8 img-thumbnail rounded mx-auto d-block mt-3" alt="...">
         <p dir="rtl" class="text-right mt-4">{{ post.content }}</p>
-        <div class="form-group">
-            <label>content :</label>
-            {{ comment_form.content }}
-        </div>
+        <form method="post" action="{% url 'post' post.slug %}" style="height: 300px">{% csrf_token %}
+            <div class="form-group mt-5" dir="rtl">
+                <label class="col-12 text-right" dir="rtl">پیشنهاد :</label>
+                {{ form.content }}
+                <div class="col-12 text-right pr-0">
+                    <button type="submit" class="mt-2">Submit Comment</button>
+                </div>
+                <div class="col-12 text-right pr-0">
+                    <button type="submit" class="mt-2" onclick="like('{{ post.slug }}')">ok</button>
+                </div>
+            </div>
+        </form>
     </div>
+{% endblock %}
+{% block javascript %}
+    <script>
+    function like(slug){
+        const data = JSON.stringify({slug: slug})
+        $.ajax({
+            type: "post",
+            url: "{% url 'like' %}",
+            data: data,
+            success: function (response) {
+                console.log(response);
+            }});
+    }
+    console.log('hello')
+    </script>
 {% endblock %}

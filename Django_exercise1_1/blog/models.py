@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 
@@ -37,7 +38,7 @@ class Post(models.Model):
         ordering = ['publish_time']
 
     def __str__(self):
-        return self.title
+        return self.slug
 
 
 class Comment(models.Model):
@@ -45,7 +46,7 @@ class Comment(models.Model):
     created_at = models.DateTimeField(_("Created at"), auto_now_add=True)
     updated_at = models.DateTimeField(_("Updated at"), auto_now=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_("Author"), on_delete=models.CASCADE)
-    post = models.ForeignKey(Post, verbose_name=_("Post"), on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, verbose_name=_("Post"), on_delete=models.CASCADE, related_name='comments')
 
     class Meta:
         verbose_name = _("Comment")
@@ -54,6 +55,16 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.author.name + ',' + self.post
+
+    @property
+    def like_count(self):
+        q = CommentLike.objects.filter(comment=self, status=True)
+        return q.count()
+
+    @property
+    def dislike_count(self):
+        q = self.comment_like.filter(status=False)
+        return q.count()
 
 
 class CommentLike(models.Model):

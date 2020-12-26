@@ -1,95 +1,130 @@
-from django.shortcuts import render, redirect
-from .models import Post, Comment
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.messages.views import SuccessMessageMixin
+from django.http import HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse_lazy, reverse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.generic.base import TemplateResponseMixin
+from django.views.generic.detail import SingleObjectMixin
+from django.views.generic.edit import ModelFormMixin, FormMixin, BaseCreateView, UpdateView
+
+from .models import Post, Comment, Category
 from django.contrib.auth import login, logout, authenticate, get_user_model
 from .forms import UserRegistrationForm, LoginForm, CommentForm
+
+from django.views.generic import ListView, DetailView, CreateView, FormView, TemplateView
+from django.contrib.auth.views import LoginView, LogoutView
+
+import json
 User = get_user_model()
 
 
-def home(request):
-    my_posts = Post.objects.all()
-    context = {"posts": my_posts}
-    return render(request, 'blog/home.html', context)
+class Home(LoginRequiredMixin, ListView):
+    model = Post
+    ordering = ['created_at']
+    template_name = 'blog/home.html'
 
 
-def posts(request):
-    my_posts = Post.objects.all()
-    context = {"posts": my_posts}
-    return render(request, 'blog/posts.html', context)
+class Posts(LoginRequiredMixin, ListView):
+    model = Post
+    ordering = ['created_at']
+    template_name = 'blog/posts.html'
 
 
-def categories(request, pk):
-    my_post = Post.objects.filter(category__slug=pk)
-    context = {"posts": my_post}
-    return render(request, 'blog/category.html', context)
+class Categories(LoginRequiredMixin, ListView):
+    model = Post
+    template_name = 'blog/category.html'
 
 
-def single_post(request, pk):
-    my_post = Post.objects.get(slug=pk)
-    context = {"post": my_post}
-    return render(request, 'blog/single_post.html', context)
+class SinglePost(DetailView, FormMixin, TemplateResponseMixin):
+    model = Post
+    template_name = 'blog/single_post.html'
+    # template_name_field = 'blog/single_post.html'
+    form_class = CommentForm
+    success_url = reverse_lazy('post')
 
 
-def login_view(request):
-    # if request.user.is_authenticated:
-    #     return redirect('home')
-    if request.method == 'POST':
-        form = LoginForm(request.POST)
-        if form.is_valid():
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password']
-            user = authenticate(request, username=username, password=password)
-            print(user)
-            if user:
-                login(request, user)
-                return redirect('home')
-            else:
-                return redirect('register')
-        else:
-            pass
-        context = {'form': form}
-    else:
-        form = LoginForm()
-        context = {'form': form}
-    return render(request, 'blog/login.html', context)
+class Login(LoginView):
+    authentication_form = LoginForm
 
 
-def register_view(request):
-    if request.method == "POST":
-        form = UserRegistrationForm(request.POST)
-        if form.is_valid():
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password']
-            first_name = form.cleaned_data['first_name']
-            last_name = form.cleaned_data['last_name']
-            email = form.cleaned_data['email']
-            user = User.objects.create(username=username, password=password, first_name=first_name, last_name=last_name,
-                                       email=email)
-            user.set_password(password)
-            user.save()
-            print('valid')
-        else:
-            print('invalid')
-        context = {'form': form}
-    else:
-        form = UserRegistrationForm()
-        context = {'form': form}
-    return render(request, 'blog/register.html', context)
+class Logout(LogoutView):
+    next_page = 'login'
 
 
-def logout_view(request):
-    logout(request)
-    return redirect('login')
+class SignUpView(SuccessMessageMixin, CreateView):
+    template_name = 'blog/register.html'
+    success_url = reverse_lazy('register')
+    form_class = UserRegistrationForm
+    success_message = "Your profile was created successfully"
 
 
-def comment_view(request):
-    if request.method == "Post":
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            content = form.cleaned_data['content']
-            comment = Comment.objects.create(content=content)
-            comment.save()
-        context = {'comment_form': form}
-    else:
-        form = CommentForm()
-        context = {'comment_form': form}
-    return render(request, 'blog/single_post.html', context)
+@csrf_exempt
+def like(request):
+    data = json.loads(request.body)
+    if data:
+        return HttpResponse(data)
+# @login_required
+# def comment_view(request):
+#     if request.method == "Post":
+#         form = CommentForm(request.POST)
+#         if form.is_valid():
+#             content = form.cleaned_data['content']
+#             comment = Comment.objects.create(content=content)
+#             comment.save()
+#         context = {'comment_form': form}
+#     else:
+#         form = CommentForm()
+#         context = {'comment_form': form}
+#     return render(request, 'blog/single_post.html', context)
+
+# def login_view(request):
+#     # if request.user.is_authenticated:
+#     #     return redirect('home')
+#     if request.method == 'POST':
+#         form = LoginForm(request.POST)
+#         if form.is_valid():
+#             username = form.cleaned_data['username']
+#             password = form.cleaned_data['password']
+#             user = authenticate(request, username=username, password=password)
+#             print(user)
+#             if user:
+#                 login(request, user)
+#                 return redirect('home')
+#             else:
+#                 return redirect('register')
+#         else:
+#             pass
+#         context = {'form': form}
+#     else:
+#         form = LoginForm()
+#         context = {'form': form}
+#     return render(request, 'blog/login.html', context)
+
+
+# def logout_view(request):
+#     logout(request)
+#     return redirect('login')
+
+# def register_view(request):
+#     if request.method == "POST":
+#         form = UserRegistrationForm(request.POST)
+#         if form.is_valid():
+#             username = form.cleaned_data['username']
+#             password = form.cleaned_data['password']
+#             first_name = form.cleaned_data['first_name']
+#             last_name = form.cleaned_data['last_name']
+#             email = form.cleaned_data['email']
+#             user = User.objects.create(username=username, password=password, first_name=first_name, last_name=last_name,
+#                                        email=email)
+#             user.set_password(password)
+#             user.save()
+#             print('valid')
+#         else:
+#             print('invalid')
+#         context = {'form': form}
+#     else:
+#         form = UserRegistrationForm()
+#         context = {'form': form}
+#     return render(request, 'blog/register.html', context)

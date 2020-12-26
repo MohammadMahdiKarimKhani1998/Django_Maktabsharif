@@ -1,5 +1,6 @@
 from django import forms
-from django.forms import ModelForm
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.forms import ModelForm, Form
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
@@ -8,7 +9,7 @@ from blog.models import Comment
 User = get_user_model()
 
 
-class UserRegistrationForm(ModelForm):
+class UserRegistrationForm(UserCreationForm):
     # email = forms.EmailField(label=_('email'), help_text=_('a valid email for reset your password'))
     password2 = forms.CharField(label=_('Repeat Password'), widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Repeat Password'}), required=True)
     # first_name = forms.CharField(label=_('first_name'))
@@ -49,14 +50,21 @@ class UserRegistrationForm(ModelForm):
         return password
 
 
-class LoginForm(forms.Form):
+class LoginForm(AuthenticationForm):
     username = forms.CharField(label=_('Username'), widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username'}), max_length=25)
     password = forms.CharField(label=_('Password'), widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'}), required=True)
 
 
-class CommentForm(ModelForm):
+class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
-        fields = ['content', ]
-        labels = {'content': _('Content')}
+        fields = ('content', )
         widgets = {'content': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Content'}), }
+
+    # def save(self, user=None, post=None):
+    #     comment = super(CommentForm, self).save(commit=False)
+    #     if user and post:
+    #         comment.author = user
+    #         comment.post = post
+    #     comment.save()
+    #     return comment
