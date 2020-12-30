@@ -17,18 +17,33 @@
         <h3 dir="rtl" class="text-right mt-2 mb-2">{{ post.title }}:</h3>
         <img src="../../../{{ post.image }}" class="col-8 img-thumbnail rounded mx-auto d-block mt-3" alt="...">
         <p dir="rtl" class="text-right mt-4">{{ post.content }}</p>
-        <form method="post" action="{% url 'post' post.slug %}" style="height: 300px">{% csrf_token %}
-            <div class="form-group mt-5" dir="rtl">
-                <label class="col-12 text-right" dir="rtl">پیشنهاد :</label>
-                {{ form.content }}
-                <div class="col-12 text-right pr-0">
-                    <button type="submit" class="mt-2">Submit Comment</button>
+        <form id="comment_form" method="post" action="{% url 'post' post.slug %}">
+            <div class="form-row justify-content-between">
+                <div class="form-group col-md-12">
+                  <label class="col-md-12 text-right mt-5 p-0" dir="rtl">پیشنهاد :</label>
+                  <input id="content" name="content" type="text" class="col-md-12 text-right" style="height: 150px">
                 </div>
-                <div class="col-12 text-right pr-0">
-                    <button type="submit" class="mt-2" onclick="like('{{ post.slug }}')">ok</button>
+                <div class="form-group col-md-12">
+                  <input type="submit" value="ارسال">
                 </div>
             </div>
         </form>
+        <div class="col-12 text-right pr-0">
+            <button type="submit" class="mt-2" onclick="like('{{ post.slug }}')">ok</button>
+        </div>
+        {% for comment in post.comments %}
+            <div class="border border-primary col-12 pb-2 mb-3">
+                <div class="card col-12 mt-2 mb-2">
+                  <div class="card-body">
+                    <h5 class="card-title text-right">{{ comment.author.get_full_name }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted text-right">{{ comment.created_at }}</h6>
+                    <p class="card-text text-right">{{ comment.content }}</p>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-success col-1">Like</button>
+                <button type="button" class="btn btn-danger col-1">Dislike</button>
+            </div>
+        {% endfor %}
     </div>
 {% endblock %}
 {% block javascript %}
@@ -44,5 +59,19 @@
             }});
     }
     console.log('hello')
+    document.getElementById("comment_form").addEventListener("submit", function (event){
+        event.preventDefault()
+        const content = $('#content').val()
+        const data = JSON.stringify({content, post:'{{ post.slug }}'})
+        $.ajax({
+            type: "post",
+            url: "{% url 'comment' %}",
+            data: data,
+            success: function (response){
+                const data = JSON.parse(response);
+                console.log(data);
+            }
+        });
+    })
     </script>
 {% endblock %}

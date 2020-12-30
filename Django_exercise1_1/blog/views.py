@@ -37,12 +37,9 @@ class Categories(LoginRequiredMixin, ListView):
     template_name = 'blog/category.html'
 
 
-class SinglePost(DetailView, FormMixin, TemplateResponseMixin):
+class SinglePost(DetailView):
     model = Post
     template_name = 'blog/single_post.html'
-    # template_name_field = 'blog/single_post.html'
-    form_class = CommentForm
-    success_url = reverse_lazy('post')
 
 
 class Login(LoginView):
@@ -53,7 +50,7 @@ class Logout(LogoutView):
     next_page = 'login'
 
 
-class SignUpView(SuccessMessageMixin, CreateView):
+class SignUpView(DetailView):
     template_name = 'blog/register.html'
     success_url = reverse_lazy('register')
     form_class = UserRegistrationForm
@@ -65,19 +62,19 @@ def like(request):
     data = json.loads(request.body)
     if data:
         return HttpResponse(data)
-# @login_required
-# def comment_view(request):
-#     if request.method == "Post":
-#         form = CommentForm(request.POST)
-#         if form.is_valid():
-#             content = form.cleaned_data['content']
-#             comment = Comment.objects.create(content=content)
-#             comment.save()
-#         context = {'comment_form': form}
-#     else:
-#         form = CommentForm()
-#         context = {'comment_form': form}
-#     return render(request, 'blog/single_post.html', context)
+
+
+@csrf_exempt
+def comment_view(request):
+    data = json.loads(request.body)
+    user = request.user
+    try:
+        comment = Comment.objects.create(post=Post.objects.get(slug=data['post']), content=data['content'], author=user)
+        response = {"content": comment.content}
+        return HttpResponse(json.dumps(response), status=201)
+    except:
+        response = {"error": "error"}
+        return HttpResponse(json.dumps(response), status=400)
 
 # def login_view(request):
 #     # if request.user.is_authenticated:

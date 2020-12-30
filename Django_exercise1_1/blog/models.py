@@ -40,18 +40,22 @@ class Post(models.Model):
     def __str__(self):
         return self.slug
 
+    def comments(self):
+        return Comment.objects.filter(post__slug=self.slug)
+
 
 class Comment(models.Model):
     content = models.TextField(_("content"))
     created_at = models.DateTimeField(_("Created at"), auto_now_add=True)
     updated_at = models.DateTimeField(_("Updated at"), auto_now=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_("Author"), on_delete=models.CASCADE)
-    post = models.ForeignKey(Post, verbose_name=_("Post"), on_delete=models.CASCADE, related_name='comments')
+    post = models.ForeignKey(Post, verbose_name=_("Post"), on_delete=models.CASCADE, related_name='post')
 
     class Meta:
         verbose_name = _("Comment")
         verbose_name_plural = _("Comments")
         ordering = ['-created_at']
+        unique_together = [["author", "content"]]
 
     def __str__(self):
         return self.author.name + ',' + self.post

@@ -58,7 +58,7 @@ class LoginForm(AuthenticationForm):
 class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
-        fields = ('content', )
+        fields = ['content']
         widgets = {'content': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Content'}), }
 
     # def save(self, user=None, post=None):

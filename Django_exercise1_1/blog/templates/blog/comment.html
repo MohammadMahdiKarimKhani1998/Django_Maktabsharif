@@ -1,0 +1,9 @@
+
+<form action="{% url 'comment' post.slug %}" method="post">{% csrf_token %}
+  <div class="form-group row">
+    <label class="col-sm-3 col-form-label justify-content-start">Username:</label>
+    <div class="col-sm-9" aria-placeholder="Username">
+        {{ form }}
+    </div>
+  </div>
+</form>
