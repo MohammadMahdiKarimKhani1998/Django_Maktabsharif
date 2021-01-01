@@ -1,22 +1,16 @@
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.messages.views import SuccessMessageMixin
-from django.http import HttpResponse
-from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse_lazy, reverse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.generic.base import TemplateResponseMixin
-from django.views.generic.detail import SingleObjectMixin
-from django.views.generic.edit import ModelFormMixin, FormMixin, BaseCreateView, UpdateView
-
-from .models import Post, Comment, Category
-from django.contrib.auth import login, logout, authenticate, get_user_model
-from .forms import UserRegistrationForm, LoginForm, CommentForm
-
-from django.views.generic import ListView, DetailView, CreateView, FormView, TemplateView
-from django.contrib.auth.views import LoginView, LogoutView
-
 import json
+
+from django.contrib.auth import get_user_model
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import LoginView, LogoutView
+from django.http import HttpResponse
+from django.urls import reverse_lazy
+from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import ListView, DetailView, CreateView
+
+from .forms import UserRegistrationForm, LoginForm
+from .models import Post, Comment, CommentLike
+
 User = get_user_model()
 
 
@@ -50,7 +44,7 @@ class Logout(LogoutView):
     next_page = 'login'
 
 
-class SignUpView(DetailView):
+class SignUpView(CreateView):
     template_name = 'blog/register.html'
     success_url = reverse_lazy('register')
     form_class = UserRegistrationForm
@@ -58,10 +52,26 @@ class SignUpView(DetailView):
 
 
 @csrf_exempt
-def like(request):
+def like_dislike(request):
     data = json.loads(request.body)
-    if data:
-        return HttpResponse(data)
+    user = request.user
+    comment = Comment.objects.get(id=data['comment_id'])
+    status = data['status']
+    try:
+        if user in comment.comment_likes['users']:
+            comment_like = CommentLike.objects.get(comment=comment, user=user)
+            comment_like.status = status
+            comment_like.save()
+            response = {'like_num': comment.like_count, 'dislike_num': comment.dislike_count,
+                        "comment_id": comment.id}
+            return HttpResponse(json.dumps(response), status=201)
+        else:
+            CommentLike.objects.create(status=status, user=user, comment=comment)
+            response = {'like_num': comment.like_count, 'dislike_num': comment.dislike_count, "comment_id": comment.id}
+            return HttpResponse(json.dumps(response), status=201)
+    except:
+        response = {"error": "error"}
+        return HttpResponse(json.dumps(response), status=400)
 
 
 @csrf_exempt
@@ -70,7 +80,7 @@ def comment_view(request):
     user = request.user
     try:
         comment = Comment.objects.create(post=Post.objects.get(slug=data['post']), content=data['content'], author=user)
-        response = {"content": comment.content}
+        response = {"content": comment.content, "created_at": str(comment.created_at), "author": comment.author.get_full_name(), "comment_id": comment.id, 'like_num': comment.like_count, 'dislike_num': comment.dislike_count}
         return HttpResponse(json.dumps(response), status=201)
     except:
         response = {"error": "error"}

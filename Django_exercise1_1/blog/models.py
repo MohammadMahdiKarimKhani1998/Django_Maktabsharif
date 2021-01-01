@@ -40,6 +40,7 @@ class Post(models.Model):
     def __str__(self):
         return self.slug
 
+    @property
     def comments(self):
         return Comment.objects.filter(post__slug=self.slug)
 
@@ -55,10 +56,10 @@ class Comment(models.Model):
         verbose_name = _("Comment")
         verbose_name_plural = _("Comments")
         ordering = ['-created_at']
-        unique_together = [["author", "content"]]
+        unique_together = [["author", "content", "post"]]
 
     def __str__(self):
-        return self.author.name + ',' + self.post
+        return self.content
 
     @property
     def like_count(self):
@@ -69,6 +70,12 @@ class Comment(models.Model):
     def dislike_count(self):
         q = self.comment_like.filter(status=False)
         return q.count()
+
+    @property
+    def comment_likes(self):
+        comment_like = CommentLike.objects.filter(comment=self)
+        users = [i.user for i in comment_like]
+        return {'comment_like': comment_like, 'users': users}
 
 
 class CommentLike(models.Model):
