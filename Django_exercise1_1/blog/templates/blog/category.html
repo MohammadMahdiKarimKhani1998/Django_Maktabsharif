@@ -18,7 +18,7 @@
             </div>
         </div>
         <div class="border border-dark p-2 bg-dark rounded">
-            {% for post in post_list %}
+            {% for post in category.post %}
                 <div class="jumbotron jumbotron-fluid">
                   <div class="container">
                       <h1 class="display-4 text-right" dir="rtl"><a href="{% url 'post' post.slug %}">{{ post.title }}</a></h1>

@@ -21,7 +21,12 @@
             <div class="media" style="margin: 10px 0;">
               <img src="../../../{{ post.image }}" class="img-thumbnail align-self-center" alt="Ash.jpg" style="max-width: 20%; height: auto">
               <div class="media-body border border-info">
-                <h4 class="mt-0 text-right" dir="rtl"><a href="{% url 'post' post.slug %}">{{ post.title }}</a></h4>
+                <nav aria-label="breadcrumb" dir="rtl">
+                  <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'categories' post.category.slug %}">{{ post.category.slug }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page"><a href="{% url 'post' post.slug %}"><b>{{ post.title }}</b></a></li>
+                  </ol>
+                </nav>
                 <div class="text-right" dir="rtl">
                     <div class="overflow-auto" style="height: 120px">{{ post.content }}</div>
                 </div>

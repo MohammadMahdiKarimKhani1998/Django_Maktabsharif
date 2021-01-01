@@ -3,20 +3,24 @@ import json
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
-from django.http import HttpResponse
+from django.contrib.messages.views import SuccessMessageMixin
+from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
+from django.views import generic
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, DetailView, CreateView, FormView
+from django.views.generic.edit import FormMixin
+from django.views.generic.list import MultipleObjectMixin
 
 from .forms import UserRegistrationForm, LoginForm
-from .models import Post, Comment, CommentLike
+from .models import Post, Comment, CommentLike, Category
 
 User = get_user_model()
 
 
 class Home(LoginRequiredMixin, ListView):
-    model = Post
-    ordering = ['created_at']
+    model = Category
+    ordering = ['slug']
     template_name = 'blog/home.html'
 
 
@@ -26,12 +30,12 @@ class Posts(LoginRequiredMixin, ListView):
     template_name = 'blog/posts.html'
 
 
-class Categories(LoginRequiredMixin, ListView):
-    model = Post
+class Categories(LoginRequiredMixin, DetailView):
+    model = Category
     template_name = 'blog/category.html'
 
 
-class SinglePost(DetailView):
+class SinglePost(LoginRequiredMixin, DetailView):
     model = Post
     template_name = 'blog/single_post.html'
 
@@ -44,9 +48,9 @@ class Logout(LogoutView):
     next_page = 'login'
 
 
-class SignUpView(CreateView):
+class SignUpView(SuccessMessageMixin, CreateView):
     template_name = 'blog/register.html'
-    success_url = reverse_lazy('register')
+    success_url = reverse_lazy('login')
     form_class = UserRegistrationForm
     success_message = "Your profile was created successfully"
 

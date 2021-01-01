@@ -17,6 +17,10 @@ class Category(models.Model):
     def __str__(self):
         return self.slug
 
+    @property
+    def post(self):
+        return Post.objects.filter(category=self)
+
 
 class Post(models.Model):
     title = models.CharField(_("Title"), max_length=128)
